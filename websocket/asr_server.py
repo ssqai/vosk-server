@@ -32,6 +32,7 @@ async def recognize(websocket, path):
     sample_rate = args.sample_rate
     show_words = args.show_words
     max_alternatives = args.max_alternatives
+    result_opts = args.result_opts
 
     logging.info('Connection from %s', websocket.remote_address);
 
@@ -54,6 +55,8 @@ async def recognize(websocket, path):
                 show_words = bool(jobj['words'])
             if 'max_alternatives' in jobj:
                 max_alternatives = int(jobj['max_alternatives'])
+            if 'result_opts' in jobj:
+                result_opts = jobj['result_opts']
             continue
 
         # Create the recognizer, word list is temporary disabled since not every model supports it
@@ -65,6 +68,8 @@ async def recognize(websocket, path):
                 rec = KaldiRecognizer(model, sample_rate)
             rec.SetWords(show_words)
             rec.SetMaxAlternatives(max_alternatives)
+            rec.SetResultOptions(result_opts)
+            
             if spk_model:
                 rec.SetSpkModel(spk_model)
 
@@ -96,6 +101,8 @@ async def start():
     args.spk_model_path = os.environ.get('VOSK_SPK_MODEL_PATH')
     args.sample_rate = float(os.environ.get('VOSK_SAMPLE_RATE', 8000))
     args.max_alternatives = int(os.environ.get('VOSK_ALTERNATIVES', 0))
+    args.model_path = os.environ.get('VOSK_RESULT_OPTS', 'result_opts')
+    
     args.show_words = bool(os.environ.get('VOSK_SHOW_WORDS', True))
 
     if len(sys.argv) > 1:
